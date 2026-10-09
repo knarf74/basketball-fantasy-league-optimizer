@@ -23,17 +23,22 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 
-BUILD_ID='4.4.1-FRIENDS-EDITION'
+BUILD_ID='4.4.2-FRIENDS-EDITION'
 API='https://nbafantasy.nba.com/api'
 BASE=Path(__file__).resolve().parent
 # Friends Edition: shared historical data may be bundled, but user writes are ephemeral.
 # Cloud filesystem is not durable; profiles live in each visitor's Streamlit session.
-import tempfile, shutil
+import tempfile, shutil, gzip
 CLOUD_FRIENDS_EDITION=True
-DB=Path(tempfile.gettempdir())/'crystal_ball_friends_history.sqlite'
+DB=Path(tempfile.gettempdir())/'crystal_ball_friends_history_v442.sqlite'
 _bundled_db=BASE/'nba_fantasy_v2.4.sqlite'
-if not DB.exists() and _bundled_db.exists():
-    shutil.copy2(_bundled_db, DB)
+_bundled_gzip=BASE/'nba_fantasy_v2.4.sqlite.gz'
+if not DB.exists():
+    if _bundled_gzip.exists():
+        with gzip.open(_bundled_gzip, 'rb') as source, open(DB, 'wb') as target:
+            shutil.copyfileobj(source, target)
+    elif _bundled_db.exists():
+        shutil.copy2(_bundled_db, DB)
 TIMEOUT=30
 HORIZON_GWS=4
 GW_DECAY=.85
