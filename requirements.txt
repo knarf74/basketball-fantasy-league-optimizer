@@ -1,0 +1,4 @@
+streamlit>=1.40,<2
+requests>=2.31,<3
+pulp>=2.9,<4
+openpyxl>=3.1,<4
